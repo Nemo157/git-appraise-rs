@@ -9,6 +9,7 @@ extern crate pulldown_cmark;
 extern crate git_appraise;
 extern crate persistent;
 extern crate typemap;
+extern crate chrono;
 
 use maud::PreEscaped;
 use pulldown_cmark::html;
@@ -95,8 +96,8 @@ fn style() -> String {
   )
 }
 
-fn get_reviews(repo: &Repository) -> Vec<(Oid, Review)> {
-  repo.reviews().unwrap().map(|id| (id, repo.review(id).unwrap())).collect()
+fn get_reviews(repo: &Repository) -> Vec<git_appraise::Result<(Oid, Review)>> {
+  repo.reviews().unwrap().map(|id| repo.review(id).map(|rev| (id, rev))).collect()
 }
 
 fn get_review(repo: &Repository, id: &str) -> Review {
@@ -104,7 +105,7 @@ fn get_review(repo: &Repository, id: &str) -> Review {
   repo.review(id).unwrap()
 }
 
-fn render_reviews(reviews: Vec<(Oid, Review)>) -> String {
+fn render_reviews(reviews: Vec<Result<(Oid, Review), git_appraise::Error>>) -> String {
   let mut buffer = String::new();
   html!(buffer, {
     head {
@@ -114,11 +115,18 @@ fn render_reviews(reviews: Vec<(Oid, Review)>) -> String {
     }
     body {
       ol {
-        #for &(ref id, ref review) in &reviews {
-          li {
-            a href={ "/" $id } $id
-            " -> "
-            $review.description().unwrap()
+        #for rev in &reviews {
+          #if let Some(&(ref id, ref review)) = rev.as_ref().ok() {
+            li {
+              a href={ "/" $id } $id
+              " -> "
+              $review.description().unwrap()
+            }
+          }
+          #if let Some(ref err) = rev.as_ref().err() {
+            li {
+              $err
+            }
           }
         }
       }
@@ -142,7 +150,7 @@ fn render_review(review: Review) -> String {
           li { "Requester: " $requester }
         }
         #if let Some(timestamp) = review.timestamp() {
-          li { "Timestamp: " $timestamp }
+          li { "Timestamp: " $(chrono::naive::datetime::NaiveDateTime::from_timestamp(timestamp.seconds(), 0)) }
         }
         #if let (Some(review_ref), Some(target_ref)) = (review.review_ref(), review.target_ref()) {
           li { "Proposed merge: " $review_ref " -> " $target_ref }

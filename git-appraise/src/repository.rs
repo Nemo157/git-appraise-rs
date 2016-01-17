@@ -28,7 +28,8 @@ impl Repository {
       .and_then(|note|
         note.message()
           .ok_or(Error::NotFound)
-          .and_then(|message| Review::from_str(message).map_err(From::from)))
+          .and_then(|message|
+            Review::from_str(message).map_err(From::from)))
   }
 }
 

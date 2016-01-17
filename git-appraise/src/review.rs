@@ -1,6 +1,8 @@
 use git2;
 use serde_json;
 
+use std::str::FromStr;
+use git2::{ Time };
 use super::{ Oid };
 
 #[derive(Deserialize)]
@@ -26,8 +28,8 @@ impl Review {
     serde_json::de::from_str(s)
   }
 
-  pub fn timestamp(&self) -> Option<&String> {
-    self.timestamp.as_ref()
+  pub fn timestamp(&self) -> Option<Time> {
+    self.timestamp.as_ref().and_then(|timestamp| FromStr::from_str(timestamp).ok().map(|time| Time::new(time, 0)))
   }
 
   pub fn review_ref(&self) -> Option<&String> {
