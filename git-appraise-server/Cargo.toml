@@ -1,15 +1,16 @@
 [package]
-name = "git-appraise"
+name = "git-appraise-server"
 version = "0.1.0"
 authors = ["Wim Looman <wim@nemo157.com>"]
 
 [dependencies]
-git2 = "0.3"
 iron = "0.2.6"
-serde = "0.6.7"
-serde_json = "0.6.0"
-serde_macros = "0.6.0"
 pulldown-cmark = "0.0.5"
+typemap = "*"
+
+[dependencies.git-appraise]
+path = "../git-appraise"
+version = "*"
 
 [dependencies.maud]
 git = "https://github.com/lfairy/maud"
@@ -19,6 +20,9 @@ git = "https://github.com/lfairy/maud"
 
 [dependencies.router]
 git = "https://github.com/iron/router"
+
+[dependencies.persistent]
+git = "https://github.com/iron/persistent"
 
 [dependencies.logger]
 git = "https://github.com/iron/logger"
