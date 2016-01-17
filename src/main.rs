@@ -11,6 +11,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate pulldown_cmark;
 
+use maud::PreEscaped;
 use pulldown_cmark::html;
 use std::env;
 use iron::prelude::*;
@@ -44,6 +45,67 @@ impl<'a> maud::Render for &'a Markdown<'a> {
   }
 }
 
+fn style() -> String {
+  format!("
+    html * {{
+      color-profile: sRGB;
+      rendering-intent: auto;
+    }}
+
+    body {{
+      background-color: {base03};
+      color: {base0};
+    }}
+
+    h1, h2, h3, h4, h5, h6 {{
+      color: {base1};
+      border-color: {base0};
+    }}
+
+    body {{
+      font-family: \"Raleway\", \"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;
+      margin: 20px auto;
+      max-width: 650px;
+      line-height: 1.4;
+      font-size: 18px;
+      padding: 0 10px;
+    }}
+
+    h1,h2,h3 {{
+      font-family: \"Lucida Console\", Monaco, monospace;
+      line-height: 1.2;
+    }}
+
+    a {{
+      color: {blue};
+      text-decoration: none;
+      cursor: pointer;
+    }}
+
+    a:hover {{
+      color: {lightblue}
+    }}
+  ",
+    base03 = "#002b36",
+    // base02 = "#073642",
+    // base01 = "#586e75",
+    // base00 = "#657b83",
+    base0 = "#839496",
+    base1 = "#93a1a1",
+    // base2 = "#eee8d5",
+    // base3 = "#fdf6e3",
+    // yellow = "#b58900",
+    // orange = "#cb4b16",
+    // red = "#dc322f",
+    // magenta = "#d33682",
+    // violet = "#6c71c4",
+    blue = "#268bd2",
+    // cyan = "#2aa198",
+    // green = "#859900",
+    lightblue = "#3797db"
+  )
+}
+
 fn main() {
   let path = env::args().nth(1).unwrap();
   let repo = Repository::open(path).unwrap();
@@ -66,12 +128,19 @@ fn main() {
       let content_type = "text/html".parse::<Mime>().unwrap();
       let mut buffer = String::new();
       html!(buffer, {
-        ol {
-          #for &(ref id, ref review) in &reviews {
-            li {
-              a href={ "/" $id } $id
-              " -> "
-              $(serde_json::ser::to_string_pretty(review).unwrap())
+        head {
+          style type="text/css" {
+            $PreEscaped(style())
+          }
+        }
+        body {
+          ol {
+            #for &(ref id, ref review) in &reviews {
+              li {
+                a href={ "/" $id } $id
+                " -> "
+                $(serde_json::ser::to_string_pretty(review).unwrap())
+              }
             }
           }
         }
@@ -87,29 +156,36 @@ fn main() {
       let mut buffer = String::new();
       let description = review.description.as_ref().map(|des| Markdown(des));
       html!(buffer, {
-        ul {
-          #if let Some(ref requester) = review.requester {
-            li { "Requester: " $requester }
+        head {
+          style type="text/css" {
+            $PreEscaped(style())
           }
-          #if let Some(ref timestamp) = review.timestamp {
-            li { "Timestamp: " $timestamp }
-          }
-          #if let Some(ref review_ref) = review.reviewRef {
-            li { "Proposed merge: " $review_ref " -> " $review.targetRef }
-          }
-          #if let Some(ref reviewers) = review.reviewers {
-            li { "Reviewers:"
-              ul {
-                #for reviewer in reviewers {
-                  li $reviewer
+        }
+        body {
+          ul {
+            #if let Some(ref requester) = review.requester {
+              li { "Requester: " $requester }
+            }
+            #if let Some(ref timestamp) = review.timestamp {
+              li { "Timestamp: " $timestamp }
+            }
+            #if let Some(ref review_ref) = review.reviewRef {
+              li { "Proposed merge: " $review_ref " -> " $review.targetRef }
+            }
+            #if let Some(ref reviewers) = review.reviewers {
+              li { "Reviewers:"
+                ul {
+                  #for reviewer in reviewers {
+                    li $reviewer
+                  }
                 }
               }
             }
-          }
-          #if let Some(ref description) = description {
-            li {
-              "Description: "
-              $description
+            #if let Some(ref description) = description {
+              li {
+                "Description: "
+                $description
+              }
             }
           }
         }
