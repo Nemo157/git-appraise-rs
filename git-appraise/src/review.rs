@@ -25,7 +25,7 @@ pub struct Reviews<'r> {
 
 impl Review {
   pub fn from_str(s: &str) -> Result<Review, serde_json::error::Error> {
-    serde_json::de::from_str(s)
+    serde_json::de::from_str(s.lines().rev().nth(0).unwrap())
   }
 
   pub fn timestamp(&self) -> Option<Time> {
