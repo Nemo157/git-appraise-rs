@@ -24,12 +24,16 @@ pub struct Reviews<'r> {
 }
 
 impl Review {
-  pub fn from_str(s: &str) -> Result<Review, serde_json::error::Error> {
-    serde_json::de::from_str(s.lines().rev().nth(0).unwrap())
+  pub fn from_str(s: &str) -> Result<Review, (serde_json::error::Error, String)> {
+    serde_json::de::from_str(s).map_err(|err| (err, s.to_string()))
   }
 
   pub fn timestamp(&self) -> Option<Time> {
-    self.timestamp.as_ref().and_then(|timestamp| FromStr::from_str(timestamp).ok().map(|time| Time::new(time, 0)))
+    self.timestamp.as_ref()
+      .and_then(|timestamp|
+        FromStr::from_str(timestamp)
+          .ok()
+          .map(|time| Time::new(time, 0)))
   }
 
   pub fn review_ref(&self) -> Option<&String> {

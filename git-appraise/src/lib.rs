@@ -9,6 +9,7 @@ mod error;
 mod result;
 mod repository;
 mod review;
+mod ci_status;
 
 pub use git2::Oid;
 pub use error::Error;
@@ -16,6 +17,7 @@ pub use result::Result;
 
 pub use repository::Repository;
 pub use review::{ Review, Reviews };
+pub use ci_status::{ CIStatus, Status };
 
   //   .notes(Some("refs/notes/devtools/reviews"))
   //   .unwrap()
