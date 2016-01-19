@@ -4,26 +4,18 @@ version = "0.1.0"
 authors = ["Wim Looman <wim@nemo157.com>"]
 
 [dependencies]
-iron = "0.2.6"
-pulldown-cmark = "0.0.5"
+
+git-appraise = { path = "../git-appraise" }
+
+iron = "*"
+router = { git = "https://github.com/iron/router" }
+persistent = { git = "https://github.com/iron/persistent" }
+logger = { git = "https://github.com/iron/logger" }
 typemap = "*"
+
 chrono = "*"
+pulldown-cmark = "*"
+maud-pulldown-cmark = "*"
 
-[dependencies.git-appraise]
-path = "../git-appraise"
-version = "*"
-
-[dependencies.maud]
-git = "https://github.com/lfairy/maud"
-
-[dependencies.maud_macros]
-git = "https://github.com/lfairy/maud"
-
-[dependencies.router]
-git = "https://github.com/iron/router"
-
-[dependencies.persistent]
-git = "https://github.com/iron/persistent"
-
-[dependencies.logger]
-git = "https://github.com/iron/logger"
+maud = "*"
+maud_macros = { git = "https://github.com/lfairy/maud" }

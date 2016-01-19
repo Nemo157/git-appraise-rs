@@ -10,9 +10,9 @@ extern crate git_appraise;
 extern crate persistent;
 extern crate typemap;
 extern crate chrono;
+extern crate maud_pulldown_cmark;
 
 use maud::PreEscaped;
-use pulldown_cmark::html;
 use std::env;
 use iron::prelude::*;
 use iron::status;
@@ -22,18 +22,7 @@ use iron::mime::Mime;
 use git_appraise::{ Oid, Repository, Review };
 use persistent::{ Read };
 use typemap::Key;
-
-struct Markdown<'a>(&'a str);
-
-impl<'a> maud::Render for &'a Markdown<'a> {
-  fn render(&self, w: &mut std::fmt::Write) -> std::fmt::Result {
-    use std::fmt::Write;
-    let mut s = String::with_capacity(self.0.len() * 3 / 2);
-    let p = pulldown_cmark::Parser::new(&self.0);
-    html::push_html(&mut s, p);
-    write!(w, "{}", s)
-  }
-}
+use maud_pulldown_cmark::Markdown;
 
 fn style() -> String {
   format!("
@@ -137,7 +126,6 @@ fn render_reviews(reviews: Vec<Result<(Oid, Review), git_appraise::Error>>) -> S
 
 fn render_review(review: Review) -> String {
   let mut buffer = String::new();
-  let description = review.description().map(|des| Markdown(des));
   html!(buffer, {
     head {
       style type="text/css" {
@@ -164,10 +152,10 @@ fn render_review(review: Review) -> String {
             }
           }
         }
-        #if let Some(ref description) = description {
+        #if let Some(ref description) = review.description() {
           li {
             "Description: "
-            $description
+            $(Markdown::FromString(description))
           }
         }
       }
