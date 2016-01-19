@@ -19,7 +19,7 @@ use iron::status;
 use router::*;
 use logger::*;
 use iron::mime::Mime;
-use git_appraise::{ Oid, Repository, Review };
+use git_appraise::{ Oid, Repository, Review, CIStatus, Status };
 use persistent::{ Read };
 use typemap::Key;
 use maud_pulldown_cmark::Markdown;
@@ -89,8 +89,11 @@ fn get_reviews(repo: &Repository) -> Vec<git_appraise::Result<(Oid, Review)>> {
   repo.reviews().unwrap().map(|id| repo.review(id).map(|rev| (id, rev))).collect()
 }
 
-fn get_review(repo: &Repository, id: &str) -> Review {
-  let id = Oid::from_str(id).unwrap();
+fn get_ci_statuses_for(repo: &Repository, id: Oid) -> Vec<CIStatus> {
+  repo.ci_statuses_for(id).unwrap().into_iter().filter_map(|s| s.ok()).collect()
+}
+
+fn get_review(repo: &Repository, id: Oid) -> Review {
   repo.review(id).unwrap()
 }
 
@@ -124,7 +127,7 @@ fn render_reviews(reviews: Vec<Result<(Oid, Review), git_appraise::Error>>) -> S
   buffer
 }
 
-fn render_review(review: Review) -> String {
+fn render_review(review: Review, statuses: Vec<CIStatus>) -> String {
   let mut buffer = String::new();
   html!(buffer, {
     head {
@@ -158,6 +161,25 @@ fn render_review(review: Review) -> String {
             $(Markdown::FromString(description))
           }
         }
+        #if statuses.len() > 0 {
+          li {
+            "CI Statuses: "
+            ol {
+              #for status in &statuses {
+                li {
+                  #if let Some(url) = status.url() {
+                    a href={ $url } $status.agent().unwrap_or("<Unknown agent>")
+                  }
+                  #if status.url().is_none() {
+                    $status.agent().unwrap_or("<Unknown agent>")
+                  }
+                  ": "
+                  $status.status().map(|s| match s { Status::Success => "success", Status::Failure => "failure" }).unwrap_or("null")
+                }
+              }
+            }
+          }
+        }
       }
     }
   }).unwrap();
@@ -179,8 +201,10 @@ fn reviews_handler(req: &mut iron::request::Request) -> IronResult<Response> {
 fn review_handler(req: &mut iron::request::Request) -> IronResult<Response> {
   let path = req.get::<Read<RepositoryPath>>().unwrap();
   let repo = Repository::open(&*path).unwrap();
-  let review = get_review(&repo, req.extensions.get::<Router>().unwrap().find("query").unwrap());
-  let buffer = render_review(review);
+  let id = Oid::from_str(req.extensions.get::<Router>().unwrap().find("query").unwrap()).unwrap();
+  let review = get_review(&repo, id);
+  let statuses = get_ci_statuses_for(&repo, id);
+  let buffer = render_review(review, statuses);
   result(buffer)
 }
 
@@ -193,7 +217,6 @@ fn main() {
 
   let mut router = Router::new();
   router.get("/", reviews_handler);
-
   router.get("/:query", review_handler);
 
   let (logger_before, logger_after) = Logger::new(None);
