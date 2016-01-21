@@ -85,19 +85,19 @@ fn style() -> String {
   )
 }
 
-fn get_reviews(repo: &Repository) -> Vec<git_appraise::Result<(Oid, Review)>> {
-  repo.reviews().unwrap().map(|id| repo.review(id).map(|rev| (id, rev))).collect()
+fn get_reviews(repo: &Repository) -> Vec<Review> {
+  repo.all_reviews().unwrap().collect()
 }
 
-fn get_ci_statuses_for(repo: &Repository, id: Oid) -> Vec<CIStatus> {
-  repo.ci_statuses_for(id).unwrap().into_iter().filter_map(|s| s.ok()).collect()
-}
+// fn get_ci_statuses_for(repo: &Repository, id: Oid) -> Vec<CIStatus> {
+  // repo.ci_statuses_for(id).unwrap().into_iter().filter_map(|s| s.ok()).collect()
+// }
 
 fn get_review(repo: &Repository, id: Oid) -> Review {
-  repo.review(id).unwrap()
+  repo.review_for(id).unwrap()
 }
 
-fn render_reviews(reviews: Vec<Result<(Oid, Review), git_appraise::Error>>) -> String {
+fn render_reviews(reviews: Vec<Review>) -> String {
   let mut buffer = String::new();
   html!(buffer, {
     head {
@@ -107,18 +107,11 @@ fn render_reviews(reviews: Vec<Result<(Oid, Review), git_appraise::Error>>) -> S
     }
     body {
       ol {
-        #for rev in &reviews {
-          #if let Some(&(ref id, ref review)) = rev.as_ref().ok() {
-            li {
-              a href={ "/" $id } $id
-              " -> "
-              $review.description().unwrap()
-            }
-          }
-          #if let Some(ref err) = rev.as_ref().err() {
-            li {
-              $err
-            }
+        #for review in &reviews {
+          li {
+            a href={ "/" $review.id() } $review.id()
+            " -> "
+            $review.request().description().unwrap()
           }
         }
       }
@@ -137,16 +130,16 @@ fn render_review(review: Review, statuses: Vec<CIStatus>) -> String {
     }
     body {
       ul {
-        #if let Some(requester) = review.requester() {
+        #if let Some(requester) = review.request().requester() {
           li { "Requester: " $requester }
         }
-        #if let Some(timestamp) = review.timestamp() {
+        #if let Some(timestamp) = review.request().timestamp() {
           li { "Timestamp: " $(chrono::naive::datetime::NaiveDateTime::from_timestamp(timestamp.seconds(), 0)) }
         }
-        #if let (Some(review_ref), Some(target_ref)) = (review.review_ref(), review.target_ref()) {
+        #if let (Some(review_ref), Some(target_ref)) = (review.request().review_ref(), review.request().target_ref()) {
           li { "Proposed merge: " $review_ref " -> " $target_ref }
         }
-        #if let Some(reviewers) = review.reviewers() {
+        #if let Some(reviewers) = review.request().reviewers() {
           li { "Reviewers:"
             ul {
               #for reviewer in reviewers {
@@ -155,7 +148,7 @@ fn render_review(review: Review, statuses: Vec<CIStatus>) -> String {
             }
           }
         }
-        #if let Some(ref description) = review.description() {
+        #if let Some(ref description) = review.request().description() {
           li {
             "Description: "
             $(Markdown::FromString(description))
@@ -203,7 +196,8 @@ fn review_handler(req: &mut iron::request::Request) -> IronResult<Response> {
   let repo = Repository::open(&*path).unwrap();
   let id = Oid::from_str(req.extensions.get::<Router>().unwrap().find("query").unwrap()).unwrap();
   let review = get_review(&repo, id);
-  let statuses = get_ci_statuses_for(&repo, id);
+  //let statuses = get_ci_statuses_for(&repo, id);
+  let statuses = vec![];
   let buffer = render_review(review, statuses);
   result(buffer)
 }

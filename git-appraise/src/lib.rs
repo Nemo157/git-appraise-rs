@@ -9,14 +9,19 @@ mod error;
 mod result;
 mod repository;
 mod review;
+mod reviews;
 mod ci_status;
+mod refs;
+mod request;
 
 pub use git2::Oid;
 pub use error::Error;
 pub use result::Result;
 
 pub use repository::Repository;
-pub use review::{ Review, Reviews };
+pub use request::Request;
+pub use review::Review;
+pub use reviews::Reviews;
 pub use ci_status::{ CIStatus, Status };
 
   //   .notes(Some("refs/notes/devtools/reviews"))
