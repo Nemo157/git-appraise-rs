@@ -12,14 +12,15 @@ extern crate typemap;
 extern crate chrono;
 extern crate maud_pulldown_cmark;
 
-use maud::PreEscaped;
+use maud::{ PreEscaped, Render };
 use std::env;
+use std::fmt;
 use iron::prelude::*;
 use iron::status;
 use router::*;
 use logger::*;
 use iron::mime::Mime;
-use git_appraise::{ Oid, Repository, Review, Status };
+use git_appraise::{ Oid, Repository, Review, Status, Comment };
 use persistent::{ Read };
 use typemap::Key;
 use maud_pulldown_cmark::markdown;
@@ -116,6 +117,64 @@ fn render_reviews(reviews: Vec<Review>) -> String {
   buffer
 }
 
+struct RequestRenderer<'a>(&'a git_appraise::Request);
+
+impl<'a> Render for RequestRenderer<'a> {
+  fn render(&self, mut w: &mut fmt::Write) -> fmt::Result {
+    let request = self.0;
+    html!(w, {
+      div {
+        #if let Some(requester) = request.requester() {
+          div { "Requester: " $requester }
+        }
+        #if let Some(timestamp) = request.timestamp() {
+          div { "Timestamp: " $(chrono::naive::datetime::NaiveDateTime::from_timestamp(timestamp.seconds(), 0)) }
+        }
+        #if let (Some(review_ref), Some(target_ref)) = (request.review_ref(), request.target_ref()) {
+          div { "Proposed merge: " $review_ref " -> " $target_ref }
+        }
+        #if let Some(reviewers) = request.reviewers() {
+          div { "Reviewers:"
+            ul {
+              #for reviewer in reviewers {
+                li $reviewer
+              }
+            }
+          }
+        }
+        #if let Some(ref description) = request.description() {
+          div {
+            "Description: "
+            div { $(markdown::from_string(description)) }
+          }
+        }
+      }
+    })
+  }
+}
+
+struct CommentRenderer<'a>(&'a git_appraise::Comment);
+
+impl<'a> Render for CommentRenderer<'a> {
+  fn render(&self, mut w: &mut fmt::Write) -> fmt::Result {
+    let comment = self.0;
+    html!(w, {
+      div {
+        #if let Some(author) = comment.author() {
+          div { "Comment from " $author }
+        }
+        div { "Comment Status: " $comment.resolved().map(|r| if r { "lgtm" } else { "nmw" }).unwrap_or("fyi") }
+        #if let Some(location) = comment.location() {
+          div { "Referencing " $(format!("{:?}", location)) }
+        }
+        #if let Some(description) = comment.description() {
+          div { $(markdown::from_string(description)) }
+        }
+      }
+    })
+  }
+}
+
 fn render_review(review: Review) -> String {
   let mut buffer = String::new();
   html!(buffer, {
@@ -125,78 +184,42 @@ fn render_review(review: Review) -> String {
       }
     }
     body {
-      ul {
-        #if let Some(requester) = review.request().requester() {
-          li { "Requester: " $requester }
-        }
-        #if let Some(timestamp) = review.request().timestamp() {
-          li { "Timestamp: " $(chrono::naive::datetime::NaiveDateTime::from_timestamp(timestamp.seconds(), 0)) }
-        }
-        #if let (Some(review_ref), Some(target_ref)) = (review.request().review_ref(), review.request().target_ref()) {
-          li { "Proposed merge: " $review_ref " -> " $target_ref }
-        }
-        #if let Some(reviewers) = review.request().reviewers() {
-          li { "Reviewers:"
-            ul {
-              #for reviewer in reviewers {
-                li $reviewer
+      $(RequestRenderer(review.request()))
+      div {
+        "CI Statuses: "
+        ul {
+          #for status in review.ci_statuses() {
+            li {
+              #if let Some(url) = status.url() {
+                a href={ $url } $status.agent().unwrap_or("<Unknown agent>")
               }
+              #if status.url().is_none() {
+                $status.agent().unwrap_or("<Unknown agent>")
+              }
+              ": "
+              $status.status().map(|s| match s { Status::Success => "success", Status::Failure => "failure" }).unwrap_or("null")
             }
           }
         }
-        #if let Some(ref description) = review.request().description() {
-          li {
-            "Description: "
-            $(markdown::from_string(description))
-          }
-        }
-        li {
-          "CI Statuses: "
-          ol {
-            #for status in review.ci_statuses() {
+      }
+      div {
+        "Analyses: "
+        ul {
+          #for analysis in review.analyses() {
+            #if let Some(url) = analysis.url() {
               li {
-                #if let Some(url) = status.url() {
-                  a href={ $url } $status.agent().unwrap_or("<Unknown agent>")
-                }
-                #if status.url().is_none() {
-                  $status.agent().unwrap_or("<Unknown agent>")
-                }
-                ": "
-                $status.status().map(|s| match s { Status::Success => "success", Status::Failure => "failure" }).unwrap_or("null")
+                a href={ $url } $url
               }
             }
           }
         }
-        li {
-          "Analyses: "
-          ol {
-            #for analysis in review.analyses() {
-              #if let Some(url) = analysis.url() {
-                li {
-                  a href={ $url } $url
-                }
-              }
-            }
-          }
-        }
-        li {
-          "Comments: "
-          ol {
-            #for comment in review.comments() {
-              li {
-                ul {
-                  #if let Some(author) = comment.author() {
-                    li { "Comment from " $author }
-                  }
-                  li { "Comment Status: " $comment.resolved().map(|r| if r { "lgtm" } else { "nmw" }).unwrap_or("fyi") }
-                  #if let Some(location) = comment.location() {
-                    li { "Referencing " $(format!("{:?}", location)) }
-                  }
-                  #if let Some(description) = comment.description() {
-                    li { $(markdown::from_string(description)) }
-                  }
-                }
-              }
+      }
+      div {
+        "Comments: "
+        ul {
+          #for comment in review.comments() {
+            li {
+              $(CommentRenderer(&comment))
             }
           }
         }
