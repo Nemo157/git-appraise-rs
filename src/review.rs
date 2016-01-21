@@ -23,7 +23,8 @@ impl<'r> Review<'r> {
       .ok_or(Error::NotFound)
       .and_then(|message|
         message.lines()
-          .filter_map(|line| Request::from_str(line).ok())
+          .filter(|line| !line.is_empty())
+          .filter_map(|line| Request::from_str(line).map_err(|e| println!("{}", e)).ok())
           .map(|req| ByTimestamp(req))
           .max()
           .map(|wrapper| wrapper.0)

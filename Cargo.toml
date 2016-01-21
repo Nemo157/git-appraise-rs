@@ -1,0 +1,18 @@
+[package]
+name = "git-appraise"
+version = "0.0.1"
+authors = ["Wim Looman <wim@nemo157.com>"]
+description = "A rust port of the git-appraise library"
+
+repository = "https://github.com/Nemo157/git-appraise-rs"
+
+readme = "README.md"
+keywords = ["git", "git-appraise"]
+
+license = "MIT/Apache-2.0"
+
+[dependencies]
+git2 = "^0.3"
+serde = "^0.6.10"
+serde_json = "^0.6.0"
+serde_macros = "^0.6.10"
