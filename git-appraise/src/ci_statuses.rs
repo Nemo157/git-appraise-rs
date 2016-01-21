@@ -19,7 +19,7 @@ impl CIStatuses {
       .and_then(|note| note.message()
         .map(|msg| {
           let mut groups: HashMap<Option<String>, Vec<CIStatus>> = HashMap::new();
-          let statuses = msg.lines().filter_map(|line| CIStatus::from_str(id, line).ok());
+          let statuses = msg.lines().filter(|line| !line.is_empty()).filter_map(|line| CIStatus::from_str(id, line).map_err(|e| println!("{}", e)).ok());
           for status in statuses {
             let group = groups.entry(status.key().map(|key| key.to_string())).or_insert(Vec::new());
             group.push(status);

@@ -11,14 +11,17 @@ pub enum Status {
   Failure,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Data {
   timestamp: Option<String>,
   url: Option<String>,
   status: Option<String>,
   agent: Option<String>,
+  #[serde(default)]
+  v: u32,
 }
 
+#[derive(Debug)]
 pub struct CIStatus {
   commit: Oid,
   data: Data,
