@@ -22,7 +22,7 @@ use iron::mime::Mime;
 use git_appraise::{ Oid, Repository, Review, Status };
 use persistent::{ Read };
 use typemap::Key;
-use maud_pulldown_cmark::Markdown;
+use maud_pulldown_cmark::markdown;
 
 fn style() -> String {
   format!("
@@ -147,7 +147,7 @@ fn render_review(review: Review) -> String {
         #if let Some(ref description) = review.request().description() {
           li {
             "Description: "
-            $(Markdown::FromString(description))
+            $(markdown::from_string(description))
           }
         }
         li {
@@ -163,6 +163,39 @@ fn render_review(review: Review) -> String {
                 }
                 ": "
                 $status.status().map(|s| match s { Status::Success => "success", Status::Failure => "failure" }).unwrap_or("null")
+              }
+            }
+          }
+        }
+        li {
+          "Analyses: "
+          ol {
+            #for analysis in review.analyses() {
+              #if let Some(url) = analysis.url() {
+                li {
+                  a href={ $url } $url
+                }
+              }
+            }
+          }
+        }
+        li {
+          "Comments: "
+          ol {
+            #for comment in review.comments() {
+              li {
+                ul {
+                  #if let Some(author) = comment.author() {
+                    li { "Comment from " $author }
+                  }
+                  li { "Comment Status: " $comment.resolved().map(|r| if r { "lgtm" } else { "nmw" }).unwrap_or("fyi") }
+                  #if let Some(location) = comment.location() {
+                    li { "Referencing " $(format!("{:?}", location)) }
+                  }
+                  #if let Some(description) = comment.description() {
+                    li { $(markdown::from_string(description)) }
+                  }
+                }
               }
             }
           }

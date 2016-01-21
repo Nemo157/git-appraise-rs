@@ -14,6 +14,10 @@ mod ci_status;
 mod refs;
 mod request;
 mod ci_statuses;
+mod comment;
+mod comments;
+mod analysis;
+mod analyses;
 
 pub use git2::Oid;
 pub use error::Error;
@@ -25,3 +29,7 @@ pub use review::Review;
 pub use reviews::Reviews;
 pub use ci_status::{ Status, CIStatus };
 pub use ci_statuses::CIStatuses;
+pub use comment::Comment;
+pub use comments::Comments;
+pub use analysis::Analysis;
+pub use analyses::Analyses;

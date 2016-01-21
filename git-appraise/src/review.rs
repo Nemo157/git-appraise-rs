@@ -2,7 +2,7 @@ use refs;
 
 use std::str::FromStr;
 use git2::{ Repository, Note };
-use super::{ Error, Result, Oid, Request, CIStatuses };
+use super::{ Error, Result, Oid, Request, CIStatuses, Analyses, Comments };
 use request::{ ByTimestamp };
 
 pub struct Review<'r> {
@@ -41,6 +41,14 @@ impl<'r> Review<'r> {
 
   pub fn ci_statuses(&self) -> CIStatuses {
     CIStatuses::for_commit(&self.git, self.id)
+  }
+
+  pub fn comments(&self) -> Comments {
+    Comments::for_commit(&self.git, self.id)
+  }
+
+  pub fn analyses(&self) -> Analyses {
+    Analyses::for_commit(&self.git, self.id)
   }
 
   fn from_request(git: &'r Repository, id: Oid, req: Request) -> Review<'r> {
