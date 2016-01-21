@@ -24,14 +24,15 @@ impl<'r> Reviews<'r> {
 }
 
 impl<'r> Iterator for Reviews<'r> {
-  type Item = Review;
+  type Item = Review<'r>;
 
-  fn next(&mut self) -> Option<Review> {
+  fn next(&mut self) -> Option<Review<'r>> {
+    let git = self.git;
     for (_, id) in &mut self.notes {
-      let review = self.git
+      let review = git
         .find_note(refs::REVIEWS, id)
         .map_err(From::from)
-        .and_then(|note| Review::from_note(id, note));
+        .and_then(|note| Review::from_note(git, id, note));
 
       if let Ok(review) = review {
         return Some(review)

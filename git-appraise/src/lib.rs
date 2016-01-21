@@ -13,6 +13,7 @@ mod reviews;
 mod ci_status;
 mod refs;
 mod request;
+mod ci_statuses;
 
 pub use git2::Oid;
 pub use error::Error;
@@ -22,13 +23,5 @@ pub use repository::Repository;
 pub use request::Request;
 pub use review::Review;
 pub use reviews::Reviews;
-pub use ci_status::{ CIStatus, Status };
-
-  //   .notes(Some("refs/notes/devtools/reviews"))
-  //   .unwrap()
-  //   .map(|(_, id)| {
-  //     let note = repo.find_note(Some("refs/notes/devtools/reviews"), id).unwrap();
-  //     let review = serde_json::de::from_str(note.message().unwrap().lines().nth(0).unwrap()).unwrap();
-  //     (id, review)
-  //   })
-  //   .collect();
+pub use ci_status::{ Status, CIStatus };
+pub use ci_statuses::CIStatuses;

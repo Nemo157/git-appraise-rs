@@ -2,22 +2,23 @@ use refs;
 
 use std::str::FromStr;
 use git2::{ Repository, Note };
-use super::{ Error, Result, Oid };
-use request::{ Request, ByTimestamp };
+use super::{ Error, Result, Oid, Request, CIStatuses };
+use request::{ ByTimestamp };
 
-pub struct Review {
+pub struct Review<'r> {
+  git: &'r Repository,
   id: Oid,
   request: Request,
 }
 
-impl Review {
-  pub fn for_commit(git: &Repository, id: Oid) -> Result<Review> {
+impl<'r> Review<'r> {
+  pub fn for_commit(git: &'r Repository, id: Oid) -> Result<Review<'r>> {
     git.find_note(refs::REVIEWS, id)
       .map_err(From::from)
-      .and_then(|note| Review::from_note(id, note))
+      .and_then(|note| Review::from_note(git, id, note))
   }
 
-  pub fn from_note<'r>(id: Oid, note: Note<'r>) -> Result<Review> {
+  pub fn from_note(git: &'r Repository, id: Oid, note: Note<'r>) -> Result<Review<'r>> {
     note.message()
       .ok_or(Error::NotFound)
       .and_then(|message|
@@ -27,7 +28,7 @@ impl Review {
           .max()
           .map(|wrapper| wrapper.0)
           .ok_or(Error::NotFound)
-          .map(|req| Review::from_request(id, req)))
+          .map(|req| Review::from_request(git, id, req)))
   }
 
   pub fn id(&self) -> Oid {
@@ -38,8 +39,13 @@ impl Review {
     &self.request
   }
 
-  fn from_request(id: Oid, req: Request) -> Review {
+  pub fn ci_statuses(&self) -> CIStatuses {
+    CIStatuses::for_commit(&self.git, self.id)
+  }
+
+  fn from_request(git: &'r Repository, id: Oid, req: Request) -> Review<'r> {
     Review {
+      git: git,
       id: id,
       request: req,
     }
