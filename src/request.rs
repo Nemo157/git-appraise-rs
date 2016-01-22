@@ -32,28 +32,28 @@ impl Request {
           .map(|time| Time::new(time, 0)))
   }
 
-  pub fn review_ref(&self) -> Option<&String> {
-    self.review_ref.as_ref()
+  pub fn review_ref(&self) -> Option<&str> {
+    self.review_ref.as_ref().map(|s| &**s)
   }
 
-  pub fn target_ref(&self) -> Option<&String> {
-    self.target_ref.as_ref()
+  pub fn target_ref(&self) -> Option<&str> {
+    self.target_ref.as_ref().map(|s| &**s)
   }
 
-  pub fn requester(&self) -> Option<&String> {
-    self.requester.as_ref()
+  pub fn requester(&self) -> Option<&str> {
+    self.requester.as_ref().map(|s| &**s)
   }
 
-  pub fn reviewers(&self) -> Option<&Vec<String>> {
-    self.reviewers.as_ref()
+  pub fn reviewers(&self) -> Option<Vec<&str>> {
+    self.reviewers.as_ref().map(|v| v.iter().map(|s| &**s).collect())
   }
 
-  pub fn description(&self) -> Option<&String> {
-    self.description.as_ref()
+  pub fn description(&self) -> Option<&str> {
+    self.description.as_ref().map(|s| &**s)
   }
 
-  pub fn base_commit(&self) -> Option<&String> {
-    self.base_commit.as_ref()
+  pub fn base_commit(&self) -> Option<&str> {
+    self.base_commit.as_ref().map(|s| &**s)
   }
 }
 
