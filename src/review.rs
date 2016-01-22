@@ -40,8 +40,12 @@ impl<'r> Review<'r> {
     &self.request
   }
 
-  pub fn ci_statuses(&self) -> CIStatuses {
-    CIStatuses::for_commit(&self.git, self.id)
+  pub fn all_ci_statuses(&self) -> CIStatuses {
+    CIStatuses::all_for_commit(&self.git, self.id)
+  }
+
+  pub fn latest_ci_statuses(&self) -> CIStatuses {
+    CIStatuses::latest_for_commit(&self.git, self.id)
   }
 
   pub fn comments(&self) -> Comments {
@@ -53,13 +57,14 @@ impl<'r> Review<'r> {
   }
 
   pub fn events(&self) -> Events {
-    Events::new(
-      vec![Box::new(self.request().clone()) as Box<Event>]
-        .into_iter()
-        .chain(self.ci_statuses().map(|status| Box::new(status) as Box<Event>))
-        .chain(self.comments().map(|comment| Box::new(comment) as Box<Event>))
-        .chain(self.analyses().map(|analysis| Box::new(analysis) as Box<Event>))
-        .collect())
+    let mut vec: Vec<Box<Event>> = vec![Box::new(self.request().clone()) as Box<Event>]
+      .into_iter()
+      .chain(self.all_ci_statuses().map(|status| Box::new(status) as Box<Event>))
+      .chain(self.comments().map(|comment| Box::new(comment) as Box<Event>))
+      .chain(self.analyses().map(|analysis| Box::new(analysis) as Box<Event>))
+      .collect();
+    vec.sort_by(|a, b| a.timestamp().cmp(&b.timestamp()));
+    Events::new(vec)
   }
 
   fn from_request(git: &'r Repository, id: Oid, req: Request) -> Review<'r> {

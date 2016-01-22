@@ -82,7 +82,7 @@ impl Eq for ByTimestamp {
 
 impl PartialEq for ByTimestamp {
   fn eq(&self, other: &Self) -> bool {
-    self.0.timestamp().map(|t| t.seconds()).eq(&other.0.timestamp().map(|t| t.seconds()))
+    self.0.timestamp().eq(&other.0.timestamp())
   }
 }
 
@@ -94,6 +94,6 @@ impl PartialOrd for ByTimestamp {
 
 impl Ord for ByTimestamp {
   fn cmp(&self, other: &Self) -> Ordering {
-    self.0.timestamp().map(|t| t.seconds()).cmp(&other.0.timestamp().map(|t| t.seconds()))
+    self.0.timestamp().cmp(&other.0.timestamp())
   }
 }

@@ -1,6 +1,5 @@
 use serde_json;
 
-use std::cmp::{ Ord, Ordering };
 use std::str::FromStr;
 use git2::{ Time };
 use super::{ Result, Oid };
@@ -71,28 +70,5 @@ impl CIStatus {
 
   pub fn key(&self) -> Option<&str> {
     self.url().or(self.agent())
-  }
-}
-
-pub struct ByTimestamp(pub CIStatus);
-
-impl Eq for ByTimestamp {
-}
-
-impl PartialEq for ByTimestamp {
-  fn eq(&self, other: &Self) -> bool {
-    self.0.timestamp().map(|t| t.seconds()).eq(&other.0.timestamp().map(|t| t.seconds()))
-  }
-}
-
-impl PartialOrd for ByTimestamp {
-  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-    Some(self.cmp(other))
-  }
-}
-
-impl Ord for ByTimestamp {
-  fn cmp(&self, other: &Self) -> Ordering {
-    self.0.timestamp().map(|t| t.seconds()).cmp(&other.0.timestamp().map(|t| t.seconds()))
   }
 }
