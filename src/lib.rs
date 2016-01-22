@@ -18,8 +18,10 @@ mod comment;
 mod comments;
 mod analysis;
 mod analyses;
+mod event;
+mod events;
 
-pub use git2::Oid;
+pub use git2::{ Oid, Time };
 pub use error::Error;
 pub use result::Result;
 
@@ -33,3 +35,5 @@ pub use comment::Comment;
 pub use comments::Comments;
 pub use analysis::Analysis;
 pub use analyses::Analyses;
+pub use event::{ EventKind, Event };
+pub use events::Events;

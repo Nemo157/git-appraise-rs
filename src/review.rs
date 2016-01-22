@@ -2,7 +2,7 @@ use refs;
 
 use std::str::FromStr;
 use git2::{ Repository, Note };
-use super::{ Error, Result, Oid, Request, CIStatuses, Analyses, Comments };
+use super::{ Error, Result, Oid, Request, CIStatuses, Analyses, Comments, Event, Events };
 use request::{ ByTimestamp };
 
 pub struct Review<'r> {
@@ -24,7 +24,7 @@ impl<'r> Review<'r> {
       .and_then(|message|
         message.lines()
           .filter(|line| !line.is_empty())
-          .filter_map(|line| Request::from_str(line).map_err(|e| println!("{}", e)).ok())
+          .filter_map(|line| Request::from_str(id, line).map_err(|e| println!("{}", e)).ok())
           .map(|req| ByTimestamp(req))
           .max()
           .map(|wrapper| wrapper.0)
@@ -50,6 +50,16 @@ impl<'r> Review<'r> {
 
   pub fn analyses(&self) -> Analyses {
     Analyses::for_commit(&self.git, self.id)
+  }
+
+  pub fn events(&self) -> Events {
+    Events::new(
+      vec![Box::new(self.request().clone()) as Box<Event>]
+        .into_iter()
+        .chain(self.ci_statuses().map(|status| Box::new(status) as Box<Event>))
+        .chain(self.comments().map(|comment| Box::new(comment) as Box<Event>))
+        .chain(self.analyses().map(|analysis| Box::new(analysis) as Box<Event>))
+        .collect())
   }
 
   fn from_request(git: &'r Repository, id: Oid, req: Request) -> Review<'r> {

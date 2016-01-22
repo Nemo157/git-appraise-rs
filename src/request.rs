@@ -2,11 +2,10 @@ use serde_json;
 
 use std::cmp::{ Ord, Ordering };
 use std::str::FromStr;
-use git2::{ Time };
-use super::{ Error, Result };
+use super::{ Oid, Time, Error, Result };
 
-#[derive(Deserialize)]
-pub struct Request {
+#[derive(Clone, Deserialize)]
+pub struct Data {
   timestamp: Option<String>,
   #[serde(rename="reviewRef")]
   review_ref: Option<String>,
@@ -19,13 +18,32 @@ pub struct Request {
   base_commit: Option<String>,
 }
 
+#[derive(Clone)]
+pub struct Request {
+  commit: Oid,
+  data: Data,
+}
+
 impl Request {
-  pub fn from_str(s: &str) -> Result<Request> {
-    serde_json::de::from_str(s).map_err(|err| From::from((err, s.to_string())))
+  pub fn from_str(commit: Oid, s: &str) -> Result<Request> {
+    serde_json::de::from_str(s)
+      .map_err(|err| From::from((err, s.to_string())))
+      .map(|data| Request::from_data(commit, data))
+  }
+
+  fn from_data(commit: Oid, data: Data) -> Request {
+    Request {
+      commit: commit,
+      data: data,
+    }
+  }
+
+  pub fn commit(&self) -> Oid {
+    self.commit
   }
 
   pub fn timestamp(&self) -> Option<Time> {
-    self.timestamp.as_ref()
+    self.data.timestamp.as_ref()
       .and_then(|timestamp|
         FromStr::from_str(timestamp)
           .ok()
@@ -33,27 +51,27 @@ impl Request {
   }
 
   pub fn review_ref(&self) -> Option<&str> {
-    self.review_ref.as_ref().map(|s| &**s)
+    self.data.review_ref.as_ref().map(|s| &**s)
   }
 
   pub fn target_ref(&self) -> Option<&str> {
-    self.target_ref.as_ref().map(|s| &**s)
+    self.data.target_ref.as_ref().map(|s| &**s)
   }
 
   pub fn requester(&self) -> Option<&str> {
-    self.requester.as_ref().map(|s| &**s)
+    self.data.requester.as_ref().map(|s| &**s)
   }
 
   pub fn reviewers(&self) -> Option<Vec<&str>> {
-    self.reviewers.as_ref().map(|v| v.iter().map(|s| &**s).collect())
+    self.data.reviewers.as_ref().map(|v| v.iter().map(|s| &**s).collect())
   }
 
   pub fn description(&self) -> Option<&str> {
-    self.description.as_ref().map(|s| &**s)
+    self.data.description.as_ref().map(|s| &**s)
   }
 
   pub fn base_commit(&self) -> Option<&str> {
-    self.base_commit.as_ref().map(|s| &**s)
+    self.data.base_commit.as_ref().map(|s| &**s)
   }
 }
 
