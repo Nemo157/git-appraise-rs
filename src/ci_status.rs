@@ -22,26 +22,26 @@ struct Data {
 
 #[derive(Debug)]
 pub struct CIStatus {
-  commit: Oid,
+  commit_id: Oid,
   data: Data,
 }
 
 impl CIStatus {
-  pub fn from_str(commit: Oid, s: &str) -> Result<CIStatus> {
+  pub fn from_str(commit_id: Oid, s: &str) -> Result<CIStatus> {
     serde_json::de::from_str(s)
       .map_err(|err| From::from((err, s.to_string())))
-      .map(|data| CIStatus::from_data(commit, data))
+      .map(|data| CIStatus::from_data(commit_id, data))
   }
 
-  fn from_data(commit: Oid, data: Data) -> CIStatus {
+  fn from_data(commit_id: Oid, data: Data) -> CIStatus {
     CIStatus {
-      commit: commit,
+      commit_id: commit_id,
       data: data,
     }
   }
 
-  pub fn commit(&self) -> Oid {
-    self.commit
+  pub fn commit_id(&self) -> Oid {
+    self.commit_id
   }
 
   pub fn timestamp(&self) -> Option<Time> {

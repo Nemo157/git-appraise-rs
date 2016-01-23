@@ -31,26 +31,26 @@ pub struct Range {
 
 #[derive(Debug)]
 pub struct Comment {
-  commit: Oid,
+  commit_id: Oid,
   data: Data,
 }
 
 impl Comment {
-  pub fn from_str(commit: Oid, s: &str) -> Result<Comment> {
+  pub fn from_str(commit_id: Oid, s: &str) -> Result<Comment> {
     serde_json::de::from_str(s)
       .map_err(|err| From::from((err, s.to_string())))
-      .map(|data| Comment::from_data(commit, data))
+      .map(|data| Comment::from_data(commit_id, data))
   }
 
-  fn from_data(commit: Oid, data: Data) -> Comment {
+  fn from_data(commit_id: Oid, data: Data) -> Comment {
     Comment {
-      commit: commit,
+      commit_id: commit_id,
       data: data,
     }
   }
 
-  pub fn commit(&self) -> Oid {
-    self.commit
+  pub fn commit_id(&self) -> Oid {
+    self.commit_id
   }
 
   pub fn timestamp(&self) -> Option<Time> {

@@ -8,7 +8,7 @@ pub enum EventKind {
 }
 
 pub trait Event {
-  fn commit(&self) -> Oid;
+  fn commit_id(&self) -> Oid;
   fn timestamp(&self) -> Option<Time>;
 
   fn kind(&self) -> EventKind;
@@ -20,8 +20,8 @@ pub trait Event {
 }
 
 impl Event for Request {
-  fn commit(&self) -> Oid {
-    self.commit()
+  fn commit_id(&self) -> Oid {
+    self.commit_id()
   }
   fn timestamp(&self) -> Option<Time> {
     self.timestamp()
@@ -46,8 +46,8 @@ impl Event for Request {
 }
 
 impl Event for Comment {
-  fn commit(&self) -> Oid {
-    self.commit()
+  fn commit_id(&self) -> Oid {
+    self.commit_id()
   }
   fn timestamp(&self) -> Option<Time> {
     self.timestamp()
@@ -72,8 +72,8 @@ impl Event for Comment {
 }
 
 impl Event for Analysis {
-  fn commit(&self) -> Oid {
-    self.commit()
+  fn commit_id(&self) -> Oid {
+    self.commit_id()
   }
   fn timestamp(&self) -> Option<Time> {
     self.timestamp()
@@ -98,8 +98,8 @@ impl Event for Analysis {
 }
 
 impl Event for CIStatus {
-  fn commit(&self) -> Oid {
-    self.commit()
+  fn commit_id(&self) -> Oid {
+    self.commit_id()
   }
   fn timestamp(&self) -> Option<Time> {
     self.timestamp()

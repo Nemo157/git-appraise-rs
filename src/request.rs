@@ -20,41 +20,41 @@ pub struct Data {
 
 #[derive(Clone)]
 pub struct Request {
-  commit: Oid,
+  commit_id: Oid,
   data: Data,
 }
 
 impl Request {
-  pub fn all_from_note(commit: Oid, note: Note) -> Result<Vec<Request>> {
+  pub fn all_from_note(commit_id: Oid, note: Note) -> Result<Vec<Request>> {
     note
       .message()
       .ok_or(Error::NotFound)
-      .map(|message| Request::all_from_message(commit, message))
+      .map(|message| Request::all_from_message(commit_id, message))
   }
 
-  fn all_from_message(commit: Oid, message: &str) -> Vec<Request> {
+  fn all_from_message(commit_id: Oid, message: &str) -> Vec<Request> {
     message
       .lines()
       .filter(|line| !line.is_empty())
-      .filter_map(|line| Request::from_str(commit, line).map_err(|e| println!("{}", e)).ok())
+      .filter_map(|line| Request::from_str(commit_id, line).map_err(|e| println!("{}", e)).ok())
       .collect()
   }
 
-  fn from_str(commit: Oid, s: &str) -> Result<Request> {
+  fn from_str(commit_id: Oid, s: &str) -> Result<Request> {
     serde_json::de::from_str(s)
       .map_err(|err| From::from((err, s.to_string())))
-      .map(|data| Request::from_data(commit, data))
+      .map(|data| Request::from_data(commit_id, data))
   }
 
-  fn from_data(commit: Oid, data: Data) -> Request {
+  fn from_data(commit_id: Oid, data: Data) -> Request {
     Request {
-      commit: commit,
+      commit_id: commit_id,
       data: data,
     }
   }
 
-  pub fn commit(&self) -> Oid {
-    self.commit
+  pub fn commit_id(&self) -> Oid {
+    self.commit_id
   }
 
   pub fn timestamp(&self) -> Option<Time> {
