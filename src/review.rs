@@ -1,59 +1,60 @@
 use refs;
 
-use std::str::FromStr;
 use git2::{ Repository, Note };
-use super::{ Error, Result, Oid, Request, CIStatuses, Analyses, Comments, Event, Events };
-use request::{ ByTimestamp };
+use super::{ Error, Result, Oid, Request, Requests, CIStatuses, Analyses, Comments, Event, Events };
 
 pub struct Review<'r> {
   git: &'r Repository,
-  id: Oid,
+  commit: Oid,
   request: Request,
+  requests: Vec<Request>,
 }
 
 impl<'r> Review<'r> {
-  pub fn for_commit(git: &'r Repository, id: Oid) -> Result<Review<'r>> {
-    git.find_note(refs::REVIEWS, id)
+  pub fn for_commit(git: &'r Repository, commit: Oid) -> Result<Review<'r>> {
+    git.find_note(refs::REVIEWS, commit)
       .map_err(From::from)
-      .and_then(|note| Review::from_note(git, id, note))
+      .and_then(|note| Review::from_note(git, commit, note))
   }
 
-  pub fn from_note(git: &'r Repository, id: Oid, note: Note<'r>) -> Result<Review<'r>> {
-    note.message()
-      .ok_or(Error::NotFound)
-      .and_then(|message|
-        message.lines()
-          .filter(|line| !line.is_empty())
-          .filter_map(|line| Request::from_str(id, line).map_err(|e| println!("{}", e)).ok())
-          .map(|req| ByTimestamp(req))
-          .max()
-          .map(|wrapper| wrapper.0)
-          .ok_or(Error::NotFound)
-          .map(|req| Review::from_request(git, id, req)))
+  pub fn from_note(git: &'r Repository, commit: Oid, note: Note<'r>) -> Result<Review<'r>> {
+    Request::all_from_note(commit, note)
+      .and_then(|mut requests|
+        if requests.is_empty() {
+          Err(Error::NotFound)
+        } else {
+          requests.sort_by(|a, b| a.timestamp().cmp(&b.timestamp()));
+          Ok((requests.pop().unwrap(), requests))
+        })
+      .map(|(request, requests)| Review::from_requests(git, commit, request, requests))
   }
 
-  pub fn id(&self) -> Oid {
-    self.id
+  pub fn commit(&self) -> Oid {
+    self.commit
   }
 
   pub fn request(&self) -> &Request {
     &self.request
   }
 
+  pub fn all_requests(&self) -> Requests {
+    Requests::new(&self.request, &self.requests)
+  }
+
   pub fn all_ci_statuses(&self) -> CIStatuses {
-    CIStatuses::all_for_commit(&self.git, self.id)
+    CIStatuses::all_for_commit(&self.git, self.commit())
   }
 
   pub fn latest_ci_statuses(&self) -> CIStatuses {
-    CIStatuses::latest_for_commit(&self.git, self.id)
+    CIStatuses::latest_for_commit(&self.git, self.commit())
   }
 
   pub fn comments(&self) -> Comments {
-    Comments::for_commit(&self.git, self.id)
+    Comments::for_commit(&self.git, self.commit())
   }
 
   pub fn analyses(&self) -> Analyses {
-    Analyses::for_commit(&self.git, self.id)
+    Analyses::for_commit(&self.git, self.commit())
   }
 
   pub fn events(&self) -> Events {
@@ -67,11 +68,12 @@ impl<'r> Review<'r> {
     Events::new(vec)
   }
 
-  fn from_request(git: &'r Repository, id: Oid, req: Request) -> Review<'r> {
+  fn from_requests(git: &'r Repository, commit: Oid, request: Request, requests: Vec<Request>) -> Review<'r> {
     Review {
       git: git,
-      id: id,
-      request: req,
+      commit: commit,
+      request: request,
+      requests: requests,
     }
   }
 }

@@ -13,6 +13,7 @@ mod reviews;
 mod ci_status;
 mod refs;
 mod request;
+mod requests;
 mod ci_statuses;
 mod comment;
 mod comments;
@@ -27,6 +28,7 @@ pub use result::Result;
 
 pub use repository::Repository;
 pub use request::Request;
+pub use requests::Requests;
 pub use review::Review;
 pub use reviews::Reviews;
 pub use ci_status::{ Status, CIStatus };
