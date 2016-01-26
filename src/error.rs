@@ -4,7 +4,7 @@ use serde_json;
 
 #[derive(Debug)]
 pub enum Error {
-  External(Box<std::error::Error>),
+  External(Box<std::error::Error + Send>),
   Json(serde_json::error::Error, String),
   NotFound,
 }

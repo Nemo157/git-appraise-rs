@@ -12,7 +12,7 @@ keywords = ["git", "git-appraise"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
-git2 = { git = "https://github.com/alexcrichton/git2-rs.git" }
+git2 = { git = "https://github.com/alexcrichton/git2-rs" }
 serde = "^0.6.10"
 serde_json = "^0.6.0"
 serde_macros = "^0.6.10"
