@@ -2,7 +2,7 @@
 
 This is a Rust port of the [git-appraise][] library (written in Go). Currently
 it offers read-only access to the stored reviews in a repository via the
-[git2-rs][] library.  Eventually it will be expanded to include mutation and
+[git2-rs][] library.  Eventually it may be expanded to include mutation and
 creation of new reviews.
 
 ## License
