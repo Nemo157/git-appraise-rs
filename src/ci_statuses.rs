@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::vec::IntoIter;
-use git2::{ Repository, Note };
-use super::{ Oid, CIStatus };
+use git2::{ Oid, Repository, Note };
+use super::{ CIStatus };
 use refs;
 
 pub struct CIStatuses {

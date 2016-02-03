@@ -1,4 +1,5 @@
-use super::{ Request, Comment, Analysis, CIStatus, Time, Oid };
+use git2::{ Oid, Time };
+use super::{ Request, Comment, Analysis, CIStatus };
 
 pub enum EventKind {
   Request,

@@ -22,11 +22,10 @@ mod analyses;
 mod event;
 mod events;
 
-pub use git2::{ Oid, Time };
 pub use error::Error;
 pub use result::Result;
 
-pub use repository::Repository;
+pub use repository::AppraisedRepository;
 pub use request::Request;
 pub use requests::Requests;
 pub use review::Review;

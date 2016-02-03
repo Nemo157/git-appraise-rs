@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
-use git2::{ Repository, Note };
-use super::{ Oid, Comment };
+use git2::{ Oid, Repository, Note };
+use super::{ Comment };
 use refs;
 
 pub struct Comments {

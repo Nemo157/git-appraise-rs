@@ -1,7 +1,7 @@
 use refs;
 
-use git2::{ Repository, Note, Commit };
-use super::{ Error, Result, Oid, Request, Requests, CIStatuses, Analyses, Comments, Event, Events };
+use git2::{ Oid, Repository, Note, Commit };
+use super::{ Error, Result, Request, Requests, CIStatuses, Analyses, Comments, Event, Events };
 
 pub struct Review<'r> {
   git: &'r Repository,

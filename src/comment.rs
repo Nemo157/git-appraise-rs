@@ -1,8 +1,8 @@
 use serde_json;
 
 use std::str::FromStr;
-use git2::{ Time };
-use super::{ Result, Oid };
+use git2::{ Oid, Time };
+use super::{ Result };
 
 #[derive(Deserialize, Debug)]
 struct Data {

@@ -1,8 +1,8 @@
 use serde_json;
 
 use std::str::FromStr;
-use git2::Note;
-use super::{ Oid, Time, Error, Result };
+use git2::{ Oid, Time, Note };
+use super::{ Error, Result };
 
 #[derive(Clone, Deserialize)]
 pub struct Data {
