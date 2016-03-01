@@ -35,3 +35,16 @@ OPENSSL_ROOT_DIR=`brew --prefix openssl` \
 DEP_OPENSSL_INCLUDE=`brew --prefix openssl`/include \
 cargo build
 ```
+
+This library uses the combined `serde_macros` on nightly and `syntex` on stable
+approach described [in the `serde` readme][serde-readme]. To build on stable
+just use `cargo build` as normal, to build on nightly use
+
+```sh
+cargo build --no-default-features --features nightly
+```
+
+It's recommended to use nightly for development as the error messages should be
+better.
+
+[serde-readme]: https://github.com/serde-rs/serde#using-serde-with-stable-rust-syntex-and-serde_codegen

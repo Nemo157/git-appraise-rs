@@ -11,8 +11,18 @@ keywords = ["git", "git-appraise"]
 
 license = "MIT/Apache-2.0"
 
+build = "build.rs"
+
+[features]
+default = ["serde_codegen"]
+nightly = ["serde_macros"]
+
 [dependencies]
 git2 = "0.4.2"
 serde = "0.7"
 serde_json = "0.7"
-serde_macros = "0.7"
+serde_macros = { version = "0.7", optional = true }
+
+[build-dependencies]
+serde_codegen = { version = "0.7", optional = true }
+syntex = "0.29"
