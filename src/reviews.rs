@@ -24,21 +24,18 @@ impl<'r> Reviews<'r> {
 }
 
 impl<'r> Iterator for Reviews<'r> {
-  type Item = Review<'r>;
+  type Item = Result<Review<'r>>;
 
-  fn next(&mut self) -> Option<Review<'r>> {
+  fn next(&mut self) -> Option<Result<Review<'r>>> {
     let git = self.git;
-    for (_, id) in &mut self.notes {
-      let review = git
-        .find_note(refs::REVIEWS, id)
+    self.notes
+      .next()
+      .map(|note| note
         .map_err(From::from)
-        .and_then(|note| Review::from_note(git, id, note));
-
-      if let Ok(review) = review {
-        return Some(review)
-      }
-    }
-    None
+        .and_then(|(_, id)|
+          git.find_note(refs::REVIEWS, id)
+            .map_err(From::from)
+            .and_then(|note| Review::from_note(git, id, note))))
   }
 
   fn size_hint(&self) -> (usize, Option<usize>) {

@@ -31,7 +31,7 @@ If building on OS X with a `homebrew` installed copy of OpenSSL you'll need to
 specify where this is to enable building `libssh2-sys`.  Use something like:
 
 ```sh
-OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2d_1 \
-DEP_OPENSSL_INCLUDE=/usr/local/Cellar/openssl/1.0.2d_1/include \
+OPENSSL_ROOT_DIR=`brew --prefix openssl` \
+DEP_OPENSSL_INCLUDE=`brew --prefix openssl`/include \
 cargo build
 ```

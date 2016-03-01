@@ -1,6 +1,6 @@
 [package]
 name = "git-appraise"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Wim Looman <wim@nemo157.com>"]
 description = "A rust port of the git-appraise library"
 
@@ -12,7 +12,7 @@ keywords = ["git", "git-appraise"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
-git2 = { git = "https://github.com/alexcrichton/git2-rs" }
-serde = "^0.6.10"
-serde_json = "^0.6.0"
-serde_macros = "^0.6.10"
+git2 = "0.4.2"
+serde = "0.7"
+serde_json = "0.7"
+serde_macros = "0.7"
