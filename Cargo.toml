@@ -1,6 +1,6 @@
 [package]
 name = "git-appraise"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Wim Looman <wim@nemo157.com>"]
 description = "A rust port of the git-appraise library"
 
