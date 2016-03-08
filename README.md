@@ -1,9 +1,19 @@
-# git-appraise (Rust) [![release-badge][]][cargo]
+# git-appraise (Rust) [![travis-badge][]][travis] [![downloads-badge][] ![release-badge][]][crate] [![license-badge][]](#license)
 
 This is a Rust port of the [git-appraise][] library (written in Go). Currently
 it offers read-only access to the stored reviews in a repository via the
 [git2-rs][] library.  Eventually it may be expanded to include mutation and
 creation of new reviews.
+
+[travis-badge]: https://img.shields.io/travis/Nemo157/git-appraise-rs/master.svg?style=flat-square
+[downloads-badge]: https://img.shields.io/crates/d/git-appraise.svg?style=flat-square
+[release-badge]: https://img.shields.io/crates/v/git-appraise.svg?style=flat-square
+[license-badge]: https://img.shields.io/crates/l/git-appraise.svg?style=flat-square
+[travis]: https://travis-ci.org/Nemo157/git-appraise-rs
+[crate]: https://crates.io/crates/git-appraise
+
+[git-appraise]: https://github.com/google/git-appraise
+[git2-rs]: https://github.com/alexcrichton/git2-rs
 
 ## License
 
@@ -19,11 +29,6 @@ at your option.
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you shall be dual licensed as above, without any
 additional terms or conditions.
-
-[release-badge]: https://img.shields.io/badge/crate-coming--soon-yellowgreen.svg?style=flat-square
-[cargo]: https://crates.io/crates/git-appraise
-[git-appraise]: https://github.com/google/git-appraise
-[git2-rs]: https://github.com/alexcrichton/git2-rs
 
 ## Developing
 
