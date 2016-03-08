@@ -1,0 +1,38 @@
+language: rust
+rust:
+  - nightly
+  - beta
+  - stable
+sudo: false
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - rust: nightly
+
+env:
+  global:
+    - secure: CQIgfpqaiEfig0/nJLQN1w0gATAiNC/AYlI7ZgstIUfUjygfDFXI3LwPJT+96nnoiQGVPwKROVcCzMAkFAu6obgMqeGJAz+WauIOH6RD+3o31cmhbmyqVE+ERcfrpznJ4PDkyuEwfHuvJKB0sVd8INt6/oeSu0Syhb9k1HEKzkykl+BQDaZDMuASPrcisnHllp21uNmu9NE/x366lhfFyRD9pJVJV39K3mrGai0SORxfWnC5awcSPIOm+dQk71LN6wH+57CkXgiU55Yv/6yHlKh4OULCK8xCMHTvRNsq//pECTST1Hyejao6C8Ui1hkDYmYKeLxMAO94UJaYSSzvzQM6CYV8FMlU2RxxvxX2BTBWpgcnv0XNWSTGlLGhjtT1SmZOijr2aq1YVe39iBTEkaflMPQkH8Set2ar6cVqsdbNKR+uMfkqYwzhyZKBDYpbd5EEEQ6WqgHjnLO/dtSlh7mDuASci/7AJ4HF/VY8BeJw6T/jVdmLuK0/IfcNUWH/S4zo0BautWDqBnsteNFfqcYgsgk91iuF8GcHO0IXYmPa7jSuVoklzy4kPgEp29Q4+cIAcxrxfT7+diWUaWXE806KEW322F0wnpTej0OEzSrHEjX/I3QPUy9TgUrm6eGeoUfyGpTtVrZg4yZJy+x0hKhhrS/UeKpmuTA8lBPxRvE=
+
+script:
+  - cargo build --release --verbose
+  - cargo test --verbose
+
+before_deploy:
+  - cargo package --verbose
+
+deploy:
+  provider: script
+  script: cargo publish --verbose --token "$CRATES_IO_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    condition: "$TRAVIS_RUST_VERSION = stable"
+
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+    packages:
+      - cmake
