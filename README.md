@@ -32,7 +32,8 @@ specify where this is to enable building `libssh2-sys`.  Use something like:
 
 ```sh
 OPENSSL_ROOT_DIR=`brew --prefix openssl` \
-DEP_OPENSSL_INCLUDE=`brew --prefix openssl`/include \
+OPENSSL_LIB_DIR=`brew --prefix openssl`/lib \
+OPENSSL_INCLUDE_DIR=`brew --prefix openssl`/include \
 cargo build
 ```
 
