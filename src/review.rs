@@ -62,13 +62,13 @@ impl<'r> Review<'r> {
   }
 
   pub fn events(&self) -> Events {
-    let mut vec: Vec<Box<Event>> = vec![Box::new(self.request().clone()) as Box<Event>]
-      .into_iter()
-      .chain(self.all_ci_statuses().map(|status| Box::new(status) as Box<Event>))
-      .chain(self.comments().map(|comment| Box::new(comment) as Box<Event>))
-      .chain(self.analyses().map(|analysis| Box::new(analysis) as Box<Event>))
-      .collect();
+    let mut vec = Vec::new();
+    vec.extend(self.all_ci_statuses().map(|status| Box::new(status) as Box<Event>));
+    vec.extend(self.comments().map(|comment| Box::new(comment) as Box<Event>));
+    vec.extend(self.analyses().map(|analysis| Box::new(analysis) as Box<Event>));
+
     vec.sort_by(|a, b| a.timestamp().cmp(&b.timestamp()));
+    vec.insert(0, Box::new(self.request().clone()) as Box<Event>);
     Events::new(vec)
   }
 
