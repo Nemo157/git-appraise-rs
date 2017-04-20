@@ -1,11 +1,39 @@
-#![cfg_attr(feature = "serde_macros", feature(plugin, custom_derive, custom_attribute))]
-#![cfg_attr(feature = "serde_macros", plugin(serde_macros))]
-
 extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
+extern crate git2;
 
-#[cfg(feature = "serde_macros")]
-include!("lib.in.rs");
+mod error;
+mod result;
+mod repository;
+mod review;
+mod reviews;
+mod ci_status;
+mod refs;
+mod request;
+mod requests;
+mod ci_statuses;
+mod comment;
+mod comments;
+mod analysis;
+mod analyses;
+mod event;
+mod events;
 
-#[cfg(not(feature = "serde_macros"))]
-include!(concat!(env!("OUT_DIR"), "/lib.rs"));
+pub use error::Error;
+pub use result::Result;
+
+pub use repository::AppraisedRepository;
+pub use request::Request;
+pub use requests::Requests;
+pub use review::Review;
+pub use reviews::Reviews;
+pub use ci_status::{ Status, CIStatus };
+pub use ci_statuses::CIStatuses;
+pub use comment::Comment;
+pub use comments::Comments;
+pub use analysis::Analysis;
+pub use analyses::Analyses;
+pub use event::{ EventKind, Event };
+pub use events::Events;

@@ -1,6 +1,6 @@
 [package]
 name = "git-appraise"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Wim Looman <wim@nemo157.com>"]
 description = "A rust port of the git-appraise library"
 
@@ -11,18 +11,8 @@ keywords = ["git", "git-appraise"]
 
 license = "MIT/Apache-2.0"
 
-build = "build.rs"
-
-[features]
-default = ["serde_codegen"]
-nightly = ["serde_macros"]
-
 [dependencies]
-git2 = "0.4.2"
-serde = "0.7"
-serde_json = "0.7"
-serde_macros = { version = "0.7", optional = true }
-
-[build-dependencies]
-serde_codegen = { version = "0.7", optional = true }
-syntex = "0.32"
+git2 = "0.6.4"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
